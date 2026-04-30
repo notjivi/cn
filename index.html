@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<!-- saved from url=(0080)https://swaminathan-a.github.io/circuit-switching-project/circuit-switching.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Circuit Switching — CN Project</title>
+<link href="./index_files/css2" rel="stylesheet">
+<style>
+:root {
+  --bg: #030a0f;
+  --bg2: #050f18;
+  --panel: #071520;
+  --border: #0d3a5c;
+  --accent: #00d4ff;
+  --accent2: #ff6b35;
+  --accent3: #00ff9d;
+  --text: #c8e6f5;
+  --muted: #ffffff;
+  --glow: 0 0 20px rgba(0,212,255,0.3);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+body::before {
+  content:'';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(3,10,15,0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+.logo { font-family: 'Orbitron', monospace; font-size: 0.85rem; font-weight: 700; color: var(--accent); letter-spacing: 2px; text-shadow: var(--glow); }
+nav ul { list-style: none; display: flex; gap: 2rem; }
+nav a { color: var(--muted); text-decoration: none; font-size: 0.8rem; letter-spacing: 1px; font-family: 'Share Tech Mono', monospace; transition: color 0.2s; }
+nav a:hover { color: var(--accent); }
+section { position: relative; z-index: 1; padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
+#hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding-top: 80px; max-width: 100%; padding-left: 5rem; }
+.hero-tag { font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; color: var(--accent); letter-spacing: 3px; margin-bottom: 1rem; opacity: 0; animation: fadeUp 0.6s 0.2s forwards; }
+h1 { font-family: 'Orbitron', monospace; font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 900; line-height: 1.1; color: #fff; text-shadow: 0 0 60px rgba(0,212,255,0.2); opacity: 0; animation: fadeUp 0.6s 0.4s forwards; }
+h1 span { color: var(--accent); }
+.hero-sub { font-size: 1.2rem; color: var(--muted); max-width: 600px; margin-top: 1.5rem; opacity: 0; animation: fadeUp 0.6s 0.6s forwards; }
+.hero-badges { display: flex; gap: 1rem; margin-top: 2.5rem; flex-wrap: wrap; opacity: 0; animation: fadeUp 0.6s 0.8s forwards; }
+.badge { border: 1px solid var(--border); padding: 0.4rem 1rem; border-radius: 2px; font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; color: var(--accent3); background: rgba(0,255,157,0.05); }
+@keyframes fadeUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+.section-label { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; letter-spacing: 3px; color: var(--accent); margin-bottom: 0.5rem; }
+h2 { font-family: 'Orbitron', monospace; font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700; color: #fff; margin-bottom: 2rem; }
+.concept-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+.card { background: var(--panel); border: 1px solid var(--border); padding: 1.8rem; position: relative; overflow: hidden; transition: border-color 0.3s, transform 0.3s; }
+.card::before { content:''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--accent); transform: scaleY(0); transform-origin: bottom; transition: transform 0.3s; }
+.card:hover { border-color: var(--accent); transform: translateY(-3px); }
+.card:hover::before { transform: scaleY(1); }
+.card-icon { font-size: 2rem; margin-bottom: 1rem; }
+.card h3 { font-family: 'Orbitron', monospace; font-size: 0.9rem; color: var(--accent); letter-spacing: 1px; margin-bottom: 0.8rem; }
+.card p { color: var(--muted); font-size: 0.95rem; line-height: 1.7; }
+.phases { display: flex; gap: 0; margin-top: 2rem; position: relative; }
+.phase { flex: 1; background: var(--panel); border: 1px solid var(--border); padding: 1.5rem; position: relative; text-align: center; border-left: none; }
+.phase:first-child { border-left: 1px solid var(--border); }
+.phase-num { font-family: 'Orbitron', monospace; font-size: 2rem; font-weight: 900; color: rgba(0,212,255,0.15); position: absolute; top: 0.5rem; right: 0.8rem; }
+.phase h3 { font-family: 'Orbitron', monospace; font-size: 0.75rem; letter-spacing: 1px; color: var(--accent2); margin-bottom: 0.5rem; }
+.phase p { color: var(--muted); font-size: 0.88rem; }
+.phase-arrow { display: flex; align-items: center; color: var(--accent); font-size: 1.5rem; padding: 0 0.2rem; }
+.divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 0 auto; max-width: 1100px; }
+.compare-table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; font-size: 0.9rem; }
+.compare-table th { font-family: 'Orbitron', monospace; font-size: 1.65rem; letter-spacing: 1px; color: var(--accent); background: rgba(0,212,255,0.08); border: 1px solid var(--border); padding: 0.8rem 1rem; text-align: left; }
+.compare-table td { border: 1px solid var(--border); padding: 0.8rem 1rem; color: var(--muted); }
+.compare-table tr:hover td { background: rgba(0,212,255,0.04); color: var(--text); }
+.good { color: var(--accent3) !important; }
+.bad  { color: var(--accent2) !important; }
+.qa-section { margin-top: 2rem; }
+.qa-item { background: var(--panel); border: 1px solid var(--border); margin-bottom: 1rem; border-radius: 2px; overflow: hidden; }
+.qa-question { padding: 1.2rem 1.5rem; font-family: 'Share Tech Mono', monospace; font-size: 1rem; color: var(--accent); cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: rgba(0,212,255,0.02); transition: background 0.3s; }
+.qa-question:hover { background: rgba(0,212,255,0.08); }
+.qa-question::after { content: '+'; font-size: 1.5rem; font-family: 'Orbitron', monospace; transition: transform 0.3s; }
+.qa-item.active .qa-question::after { transform: rotate(45deg); color: var(--accent2); }
+.qa-answer { max-height: 0; padding: 0 1.5rem; color: var(--muted); background: #030a0f; transition: all 0.3s ease-in-out; opacity: 0; overflow: hidden; }
+.qa-item.active .qa-answer { max-height: 2000px; padding: 1.5rem; opacity: 1; border-top: 1px solid var(--border); }
+.qa-answer strong { color: var(--text); }
+.qa-answer .math-step { display: block; background: rgba(0,0,0,0.4); padding: 0.8rem; margin: 0.5rem 0; border-left: 2px solid var(--accent3); font-family: 'Share Tech Mono', monospace; color: var(--accent3); font-size: 0.9rem; }
+.qa-category { font-family: 'Orbitron', monospace; font-size: 1.2rem; color: #fff; margin: 2.5rem 0 1rem; border-bottom: 1px dashed var(--border); padding-bottom: 0.5rem; }
+footer { border-top: 1px solid var(--border); text-align: center; padding: 2rem; font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; color: var(--muted); position: relative; z-index: 1; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ══════════════════════════════════════
+   VISUALIZATION — COMPLEX
+══════════════════════════════════════ */
+#visualization { max-width: 100%; }
+.viz-wrapper {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.viz-topbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.3);
+  flex-wrap: wrap;
+}
+.viz-topbar .btn { padding: 0.45rem 1.1rem; font-size: 0.72rem; }
+#viz-status-bar {
+  flex: 1;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--accent);
+  letter-spacing: 1px;
+  min-width: 180px;
+}
+.viz-main {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 0;
+  min-height: 480px;
+}
+#netCanvas {
+  width: 100%;
+  display: block;
+  background: #020c14;
+  border-right: 1px solid var(--border);
+}
+.viz-sidebar {
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+  background: #040e18;
+}
+.viz-sidebar h4 {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  color: var(--accent);
+  letter-spacing: 2px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.4rem;
+}
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid rgba(13,58,92,0.4);
+}
+.stat-label { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--muted); }
+.stat-val { font-family: 'Orbitron', monospace; font-size: 0.75rem; color: #fff; }
+.stat-val.green { color: var(--accent3); }
+.stat-val.orange { color: var(--accent2); }
+.stat-val.blue { color: var(--accent); }
+.circuit-log {
+  flex: 1;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--muted);
+  overflow-y: auto;
+  max-height: 160px;
+  line-height: 1.8;
+}
+.log-entry { display: block; }
+.log-entry.setup { color: var(--accent); }
+.log-entry.data { color: var(--accent3); }
+.log-entry.teardown { color: var(--accent2); }
+.log-entry.info { color: var(--muted); }
+.viz-bottom {
+  padding: 0.8rem 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  background: rgba(0,0,0,0.2);
+}
+.legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; color: var(--muted); font-family: 'Share Tech Mono', monospace; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.legend-line { width: 20px; height: 2px; flex-shrink: 0; }
+.btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 0.6rem 1.5rem; font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; cursor: pointer; letter-spacing: 1px; transition: all 0.2s; }
+.btn:hover, .btn.active { background: var(--accent); color: var(--bg); }
+.btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-orange { border-color: var(--accent2); color: var(--accent2); }
+.btn-orange:hover, .btn-orange.active { background: var(--accent2); color: #fff; }
+.btn-green { border-color: var(--accent3); color: var(--accent3); }
+.btn-green:hover, .btn-green.active { background: var(--accent3); color: #000; }
+
+/* ══════════════════════════════════════
+   SMART NUMERICAL ENGINE
+══════════════════════════════════════ */
+.solver-wrapper {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.solver-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.3);
+}
+.solver-header h3 {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.9rem;
+  color: var(--accent);
+  letter-spacing: 1px;
+  margin-bottom: 0.4rem;
+}
+.solver-header p { color: var(--muted); font-size: 0.85rem; }
+.solver-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.inputs-panel {
+  padding: 1.5rem;
+  border-right: 1px solid var(--border);
+}
+.inputs-panel h4 {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  color: var(--accent);
+  letter-spacing: 2px;
+  margin-bottom: 1.2rem;
+}
+.variable-list { display: flex; flex-direction: column; gap: 0.6rem; }
+.var-row {
+  display: grid;
+  grid-template-columns: 24px 1fr 120px 80px;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.3);
+  transition: border-color 0.2s, background 0.2s;
+}
+.var-row.has-value {
+  border-color: rgba(0,212,255,0.4);
+  background: rgba(0,212,255,0.04);
+}
+.var-row.deduced {
+  border-color: rgba(0,255,157,0.4);
+  background: rgba(0,255,157,0.04);
+}
+.var-badge {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.6rem;
+  color: var(--muted);
+  text-align: center;
+  font-weight: 700;
+}
+.var-row.has-value .var-badge { color: var(--accent); }
+.var-row.deduced .var-badge { color: var(--accent3); }
+.var-name { font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; color: var(--muted); }
+.var-row.has-value .var-name { color: var(--text); }
+.var-row.deduced .var-name { color: var(--accent3); }
+.var-input {
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--border);
+  color: #fff;
+  padding: 0.3rem 0.5rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.78rem;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+.var-input:focus { border-color: var(--accent); }
+.var-input:disabled { opacity: 0.4; cursor: not-allowed; background: rgba(0,255,157,0.05); color: var(--accent3); }
+.var-unit { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--muted); text-align: right; }
+.var-row.has-value .var-unit, .var-row.deduced .var-unit { color: var(--accent); }
+
+.solver-actions {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.deducible-count {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--muted);
+  flex: 1;
+}
+.deducible-count span { color: var(--accent3); font-weight: bold; }
+
+/* DEDUCIBLE PANEL */
+.deducible-panel {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem;
+  background: rgba(0,0,0,0.2);
+}
+.deducible-panel h4 {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  color: var(--accent3);
+  letter-spacing: 2px;
+  margin-bottom: 1rem;
+}
+.deducible-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.deducible-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0,255,157,0.06);
+  border: 1px solid rgba(0,255,157,0.3);
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--accent3);
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.deducible-chip::before {
+  content:'';
+  position: absolute;
+  inset: 0;
+  background: rgba(0,255,157,0.1);
+  transform: translateX(-100%);
+  transition: transform 0.3s;
+}
+.deducible-chip:hover::before { transform: translateX(0); }
+.deducible-chip:hover { border-color: var(--accent3); color: #fff; }
+.chip-icon { font-size: 1rem; }
+.chip-label { font-weight: bold; }
+.chip-arrow { color: var(--muted); font-size: 0.8rem; margin-left: auto; }
+.no-deducible {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+  padding: 0.5rem 0;
+}
+
+/* SOLUTION MODAL */
+.solution-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.solution-overlay.open { opacity: 1; pointer-events: all; }
+.solution-modal {
+  background: var(--panel);
+  border: 1px solid var(--accent);
+  width: 100%;
+  max-width: 680px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 0 60px rgba(0,212,255,0.2);
+  transform: translateY(20px);
+  transition: transform 0.3s;
+}
+.solution-overlay.open .solution-modal { transform: translateY(0); }
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.4);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.modal-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.85rem;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+.modal-close {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1.2rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.modal-close:hover { border-color: var(--accent2); color: var(--accent2); }
+.modal-body { padding: 1.5rem; }
+.modal-formula {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  padding: 0.8rem 1.2rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--accent3);
+  margin-bottom: 1.5rem;
+  letter-spacing: 1px;
+}
+.modal-step {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+  opacity: 0;
+  transform: translateX(-12px);
+  transition: opacity 0.35s, transform 0.35s;
+}
+.modal-step.visible { opacity: 1; transform: translateX(0); }
+.modal-step-num {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Orbitron', monospace;
+  font-size: 0.62rem;
+  color: var(--accent);
+  margin-top: 3px;
+}
+.modal-step-body {
+  flex: 1;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border);
+  padding: 0.7rem 1rem;
+}
+.modal-step-title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.67rem;
+  letter-spacing: 1px;
+  color: var(--accent2);
+  margin-bottom: 0.25rem;
+}
+.modal-step-content { font-size: 0.88rem; color: var(--text); line-height: 1.6; }
+.modal-step-math {
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--accent3);
+  font-size: 0.82rem;
+  margin-top: 0.3rem;
+  display: block;
+}
+.modal-result {
+  background: rgba(0,212,255,0.08);
+  border: 1px solid var(--accent);
+  padding: 1rem 1.5rem;
+  margin-top: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: var(--glow);
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.modal-result.visible { opacity: 1; }
+.res-label { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; letter-spacing: 2px; color: var(--accent); }
+.res-val { font-family: 'Orbitron', monospace; font-size: 1.6rem; font-weight: 700; color: #fff; }
+.res-unit { font-family: 'Share Tech Mono', monospace; color: var(--muted); font-size: 0.8rem; }
+
+@media (max-width: 820px) {
+  .solver-body { grid-template-columns: 1fr; }
+  .inputs-panel { border-right: none; border-bottom: 1px solid var(--border); }
+  .viz-main { grid-template-columns: 1fr; }
+  .viz-sidebar { display: none; }
+  .var-row { grid-template-columns: 24px 1fr 90px 60px; }
+  #hero { padding-left: 1.5rem; }
+  .phases { flex-direction: column; }
+  .phase { border-left: 1px solid var(--border); border-top: none; }
+  .phase:first-child { border-top: 1px solid var(--border); }
+  .phase-arrow { display: none; }
+  nav ul { display: none; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">◈ CIRCUIT_SWITCH</div>
+  <ul>
+    <li><a href="https://swaminathan-a.github.io/circuit-switching-project/circuit-switching.html#concepts">CONCEPTS</a></li>
+    <li><a href="https://swaminathan-a.github.io/circuit-switching-project/circuit-switching.html#visualization">VISUALIZE</a></li>
+    <li><a href="https://swaminathan-a.github.io/circuit-switching-project/circuit-switching.html#numerical">NUMERICALS</a></li>
+    <li><a href="https://swaminathan-a.github.io/circuit-switching-project/circuit-switching.html#comparison">COMPARISON</a></li>
+    <li><a href="https://swaminathan-a.github.io/circuit-switching-project/circuit-switching.html#solved">SOLVED Q&amp;A</a></li>
+  </ul>
+</nav>
+
+<div id="hero">
+  <p class="hero-tag">// COMPUTER NETWORKS — CN PROJECT</p>
+  <h1>Circuit<br><span>Switching</span></h1>
+  <p class="hero-sub">A dedicated communication path is established between two endpoints before data transmission begins — and held exclusively for the duration of the call.</p>
+  <div class="hero-badges">
+    <span class="badge">CONCEPT EXPLORER</span>
+    <span class="badge">LIVE VISUALIZATION</span>
+    <span class="badge">SMART DEDUCTION ENGINE</span>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<section id="concepts">
+  <p class="section-label">// 01 — FUNDAMENTALS</p>
+  <h2>What is Circuit Switching?</h2>
+  <div class="concept-grid">
+    <div class="card"><div class="card-icon">⚡</div><h3>DEDICATED PATH</h3><p>A fixed route through the network is reserved exclusively for a communication session. No other traffic can use this path during the connection.</p></div>
+    <div class="card"><div class="card-icon">🔒</div><h3>RESOURCE RESERVATION</h3><p>Bandwidth, switches, and links are pre-allocated before communication starts. Resources remain reserved even during silence periods.</p></div>
+    <div class="card"><div class="card-icon">📞</div><h3>TELEPHONY ORIGIN</h3><p>Originally designed for telephone networks (PSTN). The concept of "circuits" comes from physical electrical connections in early exchanges.</p></div>
+    <div class="card"><div class="card-icon">⏱️</div><h3>GUARANTEED QoS</h3><p>Once the circuit is set up, transmission delay is constant and predictable — ideal for real-time voice and video communication.</p></div>
+    <div class="card"><div class="card-icon">🔗</div><h3>TDM / FDM MULTIPLEXING</h3><p>Circuits are created using Time-Division Multiplexing (TDM) or Frequency-Division Multiplexing (FDM) over shared physical links.</p></div>
+    <div class="card"><div class="card-icon">🚫</div><h3>CALL BLOCKING</h3><p>If all circuits on a link are occupied, new calls are blocked. The Erlang B formula calculates this blocking probability.</p></div>
+  </div>
+  <h2 style="margin-top:3rem;">Three Phases of Circuit Switching</h2>
+  <div class="phases">
+    <div class="phase"><span class="phase-num">01</span><h3>CIRCUIT SETUP</h3><p>A dedicated path is established from source to destination through intermediate switches.</p></div>
+    <div class="phase-arrow">→</div>
+    <div class="phase"><span class="phase-num">02</span><h3>DATA TRANSFER</h3><p>Data flows continuously at a guaranteed, constant rate through the reserved path.</p></div>
+    <div class="phase-arrow">→</div>
+    <div class="phase"><span class="phase-num">03</span><h3>CIRCUIT TEARDOWN</h3><p>A teardown signal releases all reserved resources, making the path available for future calls.</p></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════
+     COMPLEX VISUALIZATION
+═══════════════════════════════════ -->
+<section id="visualization">
+  <p class="section-label">// 02 — INTERACTIVE VISUALIZATION</p>
+  <h2>Multi-Layer Network Simulation</h2>
+
+  <div class="viz-wrapper">
+    <div class="viz-topbar">
+      <button class="btn" id="btn-setup" onclick="startPhase(&#39;setup&#39;)">▶ SETUP PHASE</button>
+      <button class="btn btn-green" id="btn-data" onclick="startPhase(&#39;data&#39;)" disabled="">▶ DATA BURST</button>
+      <button class="btn btn-orange" id="btn-teardown" onclick="startPhase(&#39;teardown&#39;)" disabled="">▶ TEARDOWN</button>
+      <button class="btn" onclick="resetViz()" style="border-color:#ffffff;color:#ffffff">↺ RESET</button>
+      <div id="viz-status-bar">◈ IDLE — SELECT A PHASE</div>
+    </div>
+    <div class="viz-main">
+      <canvas id="netCanvas" height="480" width="1032"></canvas>
+      <div class="viz-sidebar">
+        <h4>NETWORK STATS</h4>
+        <div class="stat-row"><span class="stat-label">PHASE</span><span class="stat-val blue" id="s-phase">IDLE</span></div>
+        <div class="stat-row"><span class="stat-label">ACTIVE CIRCUITS</span><span class="stat-val green" id="s-circuits">0</span></div>
+        <div class="stat-row"><span class="stat-label">PACKETS SENT</span><span class="stat-val blue" id="s-pkts">0</span></div>
+        <div class="stat-row"><span class="stat-label">LINK UTILIZATION</span><span class="stat-val green" id="s-util">0%</span></div>
+        <div class="stat-row"><span class="stat-label">SETUP LATENCY</span><span class="stat-val" id="s-latency">—</span></div>
+        <div class="stat-row"><span class="stat-label">BANDWIDTH</span><span class="stat-val" id="s-bw">64 kbps</span></div>
+        <h4 style="margin-top:0.5rem">CIRCUIT LOG</h4>
+        <div class="circuit-log" id="circuit-log">
+          <span class="log-entry info">[ system ready ]</span>
+        </div>
+        <h4>ACTIVE PATHS</h4>
+        <div id="active-paths" style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.62rem;color:var(--muted)">
+          No active circuits.
+        </div>
+      </div>
+    </div>
+    <div class="viz-bottom">
+      <div class="legend-item"><div class="legend-dot" style="background:#00d4ff"></div>SETUP SIGNAL</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#00ff9d"></div>DATA PACKET</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ff6b35"></div>TEARDOWN SIGNAL</div>
+      <div class="legend-item"><div class="legend-line" style="background:#00d4ff; opacity:0.4;"></div>RESERVED PATH</div>
+      <div class="legend-item"><div class="legend-line" style="background:#0d3a5c"></div>IDLE LINK</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ffe066"></div>SWITCH NODE</div>
+      <div class="legend-item"><div class="legend-dot" style="background:transparent; border:1px solid #ff6b35; display:flex; align-items:center; justify-content:center; color:#ff6b35; font-size:7px;">✕</div>BROKEN (CLICK TO TOGGLE)</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ═══════════════════════════════════
+     SMART NUMERICAL ENGINE
+═══════════════════════════════════ -->
+<section id="numerical">
+  <p class="section-label">// 03 — SMART NUMERICAL ENGINE</p>
+  <h2>Deduction-Based Solver</h2>
+
+  <div class="solver-wrapper">
+    <div class="solver-header">
+      <h3>◈ UNIVERSAL CIRCUIT SWITCHING CALCULATOR</h3>
+      <p>Enter any known values below. The engine will automatically detect what can be calculated and show you step-by-step solutions for each deducible quantity.</p>
+    </div>
+
+    <div class="solver-body">
+      <div class="inputs-panel">
+        <h4>INPUT VARIABLES — ENTER WHAT YOU KNOW</h4>
+        <div class="variable-list" id="var-list">
+          <!-- rendered by JS -->
+        <div id="row_lambda" class="var-row">
+        <div class="var-badge">λ</div>
+        <div class="var-name">Call Arrival Rate</div>
+        <input class="var-input" type="number" id="inp_lambda" placeholder="e.g. 120" step="any" oninput="onInput(&#39;lambda&#39;, this.value)">
+        <div class="var-unit">calls/hr</div>
+      </div><div id="row_h" class="var-row">
+        <div class="var-badge">h</div>
+        <div class="var-name">Average Holding Time</div>
+        <input class="var-input" type="number" id="inp_h" placeholder="e.g. 0.05" step="any" oninput="onInput(&#39;h&#39;, this.value)">
+        <div class="var-unit">hours</div>
+      </div><div id="row_A" class="var-row">
+        <div class="var-badge">A</div>
+        <div class="var-name">Traffic Intensity</div>
+        <input class="var-input" type="number" id="inp_A" placeholder="e.g. 6.0" step="any" oninput="onInput(&#39;A&#39;, this.value)">
+        <div class="var-unit">Erlangs</div>
+      </div><div id="row_N" class="var-row">
+        <div class="var-badge">N</div>
+        <div class="var-name">Number of Circuits</div>
+        <input class="var-input" type="number" id="inp_N" placeholder="e.g. 8" step="any" oninput="onInput(&#39;N&#39;, this.value)">
+        <div class="var-unit">count</div>
+      </div><div id="row_B_prob" class="var-row">
+        <div class="var-badge">B</div>
+        <div class="var-name">Blocking Probability</div>
+        <input class="var-input" type="number" id="inp_B_prob" placeholder="e.g. 0.2" step="any" oninput="onInput(&#39;B_prob&#39;, this.value)">
+        <div class="var-unit">(0–1)</div>
+      </div><div id="row_L" class="var-row">
+        <div class="var-badge">L</div>
+        <div class="var-name">Message Size</div>
+        <input class="var-input" type="number" id="inp_L" placeholder="e.g. 10000" step="any" oninput="onInput(&#39;L&#39;, this.value)">
+        <div class="var-unit">bits</div>
+      </div><div id="row_BW" class="var-row">
+        <div class="var-badge">BW</div>
+        <div class="var-name">Link Bandwidth</div>
+        <input class="var-input" type="number" id="inp_BW" placeholder="e.g. 100000" step="any" oninput="onInput(&#39;BW&#39;, this.value)">
+        <div class="var-unit">bps</div>
+      </div><div id="row_d" class="var-row">
+        <div class="var-badge">d</div>
+        <div class="var-name">Distance</div>
+        <input class="var-input" type="number" id="inp_d" placeholder="e.g. 2000" step="any" oninput="onInput(&#39;d&#39;, this.value)">
+        <div class="var-unit">km</div>
+      </div><div id="row_v" class="var-row">
+        <div class="var-badge">v</div>
+        <div class="var-name">Propagation Speed</div>
+        <input class="var-input" type="number" id="inp_v" placeholder="e.g. 200000" step="any" oninput="onInput(&#39;v&#39;, this.value)">
+        <div class="var-unit">km/s</div>
+      </div><div id="row_T_setup" class="var-row">
+        <div class="var-badge">Ts</div>
+        <div class="var-name">Circuit Setup Time</div>
+        <input class="var-input" type="number" id="inp_T_setup" placeholder="e.g. 200" step="any" oninput="onInput(&#39;T_setup&#39;, this.value)">
+        <div class="var-unit">ms</div>
+      </div><div id="row_T_tx" class="var-row">
+        <div class="var-badge">Ttx</div>
+        <div class="var-name">Transmission Delay</div>
+        <input class="var-input" type="number" id="inp_T_tx" placeholder="auto-calc" step="any" oninput="onInput(&#39;T_tx&#39;, this.value)">
+        <div class="var-unit">ms</div>
+      </div><div id="row_T_prop" class="var-row">
+        <div class="var-badge">Tp</div>
+        <div class="var-name">Propagation Delay</div>
+        <input class="var-input" type="number" id="inp_T_prop" placeholder="auto-calc" step="any" oninput="onInput(&#39;T_prop&#39;, this.value)">
+        <div class="var-unit">ms</div>
+      </div><div id="row_T_total" class="var-row">
+        <div class="var-badge">Tt</div>
+        <div class="var-name">Total End-to-End Delay</div>
+        <input class="var-input" type="number" id="inp_T_total" placeholder="auto-calc" step="any" oninput="onInput(&#39;T_total&#39;, this.value)">
+        <div class="var-unit">ms</div>
+      </div><div id="row_T_active" class="var-row">
+        <div class="var-badge">Ta</div>
+        <div class="var-name">Active Transfer Time</div>
+        <input class="var-input" type="number" id="inp_T_active" placeholder="e.g. 90" step="any" oninput="onInput(&#39;T_active&#39;, this.value)">
+        <div class="var-unit">s</div>
+      </div><div id="row_T_call" class="var-row">
+        <div class="var-badge">Tc</div>
+        <div class="var-name">Total Call Duration</div>
+        <input class="var-input" type="number" id="inp_T_call" placeholder="e.g. 300" step="any" oninput="onInput(&#39;T_call&#39;, this.value)">
+        <div class="var-unit">s</div>
+      </div><div id="row_eta" class="var-row">
+        <div class="var-badge">η</div>
+        <div class="var-name">Link Efficiency</div>
+        <input class="var-input" type="number" id="inp_eta" placeholder="auto-calc" step="any" oninput="onInput(&#39;eta&#39;, this.value)">
+        <div class="var-unit">%</div>
+      </div><div id="row_R_ch" class="var-row">
+        <div class="var-badge">Rc</div>
+        <div class="var-name">TDM Channel Rate</div>
+        <input class="var-input" type="number" id="inp_R_ch" placeholder="auto-calc" step="any" oninput="onInput(&#39;R_ch&#39;, this.value)">
+        <div class="var-unit">bps</div>
+      </div><div id="row_mesh_n" class="var-row">
+        <div class="var-badge">Mn</div>
+        <div class="var-name">Mesh Node Count</div>
+        <input class="var-input" type="number" id="inp_mesh_n" placeholder="e.g. 15" step="any" oninput="onInput(&#39;mesh_n&#39;, this.value)">
+        <div class="var-unit">nodes</div>
+      </div><div id="row_mesh_L" class="var-row">
+        <div class="var-badge">ML</div>
+        <div class="var-name">Mesh Links Required</div>
+        <input class="var-input" type="number" id="inp_mesh_L" placeholder="auto-calc" step="any" oninput="onInput(&#39;mesh_L&#39;, this.value)">
+        <div class="var-unit">links</div>
+      </div><div id="row_max_data" class="var-row">
+        <div class="var-badge">Md</div>
+        <div class="var-name">Max Data Transferred</div>
+        <input class="var-input" type="number" id="inp_max_data" placeholder="auto-calc" step="any" oninput="onInput(&#39;max_data&#39;, this.value)">
+        <div class="var-unit">MB</div>
+      </div></div>
+      </div>
+      <div style="padding:1.5rem; background: rgba(0,0,0,0.2);">
+        <h4 style="font-family:&#39;Orbitron&#39;,monospace;font-size:0.65rem;color:var(--accent);letter-spacing:2px;margin-bottom:1rem;">FORMULA REFERENCE</h4>
+        <div style="font-family:&#39;Share Tech Mono&#39;,monospace;font-size:0.72rem;color:var(--muted);line-height:2.2;display:flex;flex-direction:column;gap:0.3rem;">
+          <div style="border-left:2px solid var(--accent);padding-left:0.8rem;">A = λ × h <span style="color:#ffffff">(Traffic Intensity)</span></div>
+          <div style="border-left:2px solid var(--accent2);padding-left:0.8rem;">B(N,A) = Erlang B formula <span style="color:#ffffff">(Blocking Prob)</span></div>
+          <div style="border-left:2px solid var(--accent3);padding-left:0.8rem;">T_tx = L / BW <span style="color:#ffffff">(Transmission Delay)</span></div>
+          <div style="border-left:2px solid var(--accent3);padding-left:0.8rem;">T_prop = d / v <span style="color:#ffffff">(Propagation Delay)</span></div>
+          <div style="border-left:2px solid #ffe066;padding-left:0.8rem;">T_total = T_setup + T_tx + T_prop <span style="color:#ffffff">(End-to-End)</span></div>
+          <div style="border-left:2px solid #ffe066;padding-left:0.8rem;">η = (T_active / T_total) × 100 <span style="color:#ffffff">(Efficiency)</span></div>
+          <div style="border-left:2px solid var(--muted);padding-left:0.8rem;">R_ch = BW / N <span style="color:#ffffff">(TDM Channel Rate)</span></div>
+          <div style="border-left:2px solid var(--muted);padding-left:0.8rem;">Links = N×(N-1)/2 <span style="color:#ffffff">(Mesh Topology)</span></div>
+          <div style="border-left:2px solid var(--muted);padding-left:0.8rem;">Data = BW × T_active <span style="color:#ffffff">(Max Data)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="solver-actions">
+      <span class="deducible-count" id="deducible-count">Enter values above to see what can be calculated.</span>
+      <button class="btn" onclick="clearAll()" style="border-color:#ffffff;color:#ffffff;padding:0.4rem 0.9rem;font-size:0.72rem">✕ CLEAR ALL</button>
+    </div>
+
+    <div class="deducible-panel" id="deducible-panel">
+      <h4>▼ CALCULABLE QUANTITIES — CLICK TO SOLVE STEP BY STEP</h4>
+      <div class="deducible-grid" id="deducible-grid"><span class="no-deducible">No deducible values yet. Enter some known quantities above.</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="comparison">
+  <p class="section-label">// 04 — COMPARISON</p>
+  <h2>Circuit vs Packet Switching</h2>
+  <table class="compare-table">
+    <thead><tr><th>PARAMETER</th><th>CIRCUIT SWITCHING</th><th>PACKET SWITCHING</th></tr></thead>
+    <tbody>
+      <tr><td>Path</td><td class="good">Dedicated fixed path</td><td>Dynamic, per packet</td></tr>
+      <tr><td>Resource allocation</td><td class="bad">Pre-reserved (wasteful)</td><td class="good">On-demand (efficient)</td></tr>
+      <tr><td>Setup required</td><td class="bad">Yes (setup delay)</td><td class="good">No</td></tr>
+      <tr><td>Delay</td><td class="good">Constant, predictable</td><td class="bad">Variable (queuing)</td></tr>
+      <tr><td>Real-time suitability</td><td class="good">Excellent (voice/video)</td><td class="bad">Moderate</td></tr>
+      <tr><td>Bandwidth wasted on silence</td><td class="bad">Yes</td><td class="good">No</td></tr>
+      <tr><td>Blocking</td><td class="bad">Possible (call blocking)</td><td class="good">No blocking</td></tr>
+      <tr><td>Examples</td><td>PSTN, ISDN</td><td>Internet (IP), X.25</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="divider"></div>
+
+<section id="solved">
+  <p class="section-label">// 05 — SOLVED QUESTIONS</p>
+  <h2>Theory &amp; Numericals</h2>
+
+  <div class="qa-category">THEORY QUESTIONS (8)</div>
+  <div class="qa-item"><div class="qa-question">1. What is Circuit Switching and what are its three fundamental phases?</div><div class="qa-answer"><p><strong>Circuit Switching</strong> is a method of implementing a telecommunications network in which two network nodes establish a dedicated communications channel (circuit) through the network before the nodes may communicate.</p><br><p>The three phases are:</p><ul><li><strong>Phase 1 - Circuit Establishment (Setup):</strong> A dedicated path is created from the sender to the receiver, and all necessary resources are reserved.</li><li><strong>Phase 2 - Data Transfer:</strong> Data is transmitted continuously over the established path with a guaranteed data rate.</li><li><strong>Phase 3 - Circuit Disconnect (Teardown):</strong> The connection is terminated, and the reserved resources are freed.</li></ul></div></div>
+  <div class="qa-item"><div class="qa-question">2. How does Spatial Division Switching differ from Time Division Switching?</div><div class="qa-answer"><p><strong>Space Division Switching:</strong> The paths in the circuit are separated from one another spatially. Physical connections are made to route the signal. It requires a large number of physical links for high capacity.</p><br><p><strong>Time Division Switching:</strong> Uses TDM to share a single physical line among multiple connections by dividing the line's capacity into time slots. Digital data is stored in memory and read out in different time slots (TSI) to route calls.</p></div></div>
+  <div class="qa-item"><div class="qa-question">3. What is "Blocking" in a circuit-switched network?</div><div class="qa-answer"><p><strong>Blocking</strong> occurs when a new call attempt is rejected because all available circuits on the required path are currently occupied. In traditional telephony, this results in a busy signal. The Erlang B formula calculates the blocking probability.</p></div></div>
+  <div class="qa-item"><div class="qa-question">4. Why is Circuit Switching considered inefficient for bursty computer data traffic?</div><div class="qa-answer"><p>Computer data traffic is inherently "bursty" — short periods of high transmission followed by long idle periods. Circuit switching reserves the full bandwidth for the entire connection regardless of whether data is actively being sent, wasting bandwidth during silence periods.</p></div></div>
+  <div class="qa-item"><div class="qa-question">5. Explain the concept and impact of "Setup Delay".</div><div class="qa-answer"><p><strong>Setup Delay</strong> is the time required to establish the dedicated end-to-end circuit before any data can be transmitted. For very short messages, the setup delay can be much longer than the data transmission time, making circuit switching highly inefficient for brief communications.</p></div></div>
+  <div class="qa-item"><div class="qa-question">6. What are the main applications where Circuit Switching is preferred?</div><div class="qa-answer"><p>Circuit switching is preferred for applications requiring guaranteed QoS, specifically a constant bit rate and zero variable delay: PSTN voice calls, ISDN networks, and continuous live audio/video broadcasts.</p></div></div>
+  <div class="qa-item"><div class="qa-question">7. What is the Erlang B formula used for, and what are its inputs?</div><div class="qa-answer"><p>The <strong>Erlang B formula</strong> calculates the probability that an arriving call will be blocked. Inputs: <strong>A</strong> — Traffic Intensity in Erlangs (λ × h), and <strong>N</strong> — Number of available circuits. It assumes blocked calls are cleared (lost), not queued.</p></div></div>
+  <div class="qa-item"><div class="qa-question">8. What is a Time Slot Interchange (TSI) in digital circuit switching?</div><div class="qa-answer"><p><strong>TSI</strong> is the core mechanism of digital TDM switching. Data from an incoming time slot is written into a RAM buffer sequentially. The control logic reads data out in a different order, "switching" the signal to the correct destination's time slot on the outgoing stream.</p></div></div>
+
+  <div class="qa-category">NUMERICAL PROBLEMS (10)</div>
+  <div class="qa-item"><div class="qa-question">1. Calculate Total End-to-End Delay</div><div class="qa-answer"><p><strong>Problem:</strong> 10,000-bit message, setup = 200 ms, BW = 100 kbps, distance = 2000 km, speed = 2×10⁵ km/s.</p><span class="math-step">T_tx = 10,000 / 100,000 = 0.1 s = 100 ms</span><span class="math-step">T_prop = 2000 / 200,000 = 0.01 s = 10 ms</span><span class="math-step">Total = 200 + 100 + 10 = 310 ms</span><p><strong>Final Answer: 310 ms</strong></p></div></div>
+  <div class="qa-item"><div class="qa-question">2. Traffic Intensity Calculation</div><div class="qa-answer"><p><strong>Problem:</strong> 120 calls/hour, average holding time = 3 minutes.</p><span class="math-step">h = 3/60 = 0.05 hours</span><span class="math-step">A = λ × h = 120 × 0.05 = 6 Erlangs</span><p><strong>Final Answer: 6 Erlangs</strong></p></div></div>
+  <div class="qa-item"><div class="qa-question">3. Circuit Switching vs Packet Switching Delay</div><div class="qa-answer"><p><strong>Problem:</strong> 10 MB message, 10 Mbps link. CS setup = 1s. PS has 10% header overhead.</p><span class="math-step">CS: 1s + (80 Mbits / 10 Mbps) = 1 + 8 = 9 seconds</span><span class="math-step">PS: 88 Mbits / 10 Mbps = 8.8 seconds</span><p><strong>Final Answer: Packet Switching is faster (8.8s vs 9.0s)</strong></p></div></div>
+  <div class="qa-item"><div class="qa-question">4. Erlang B Blocking Probability (N=2, A=1)</div><div class="qa-answer"><p><strong>Problem:</strong> N = 2 circuits, A = 1 Erlang.</p><span class="math-step">Numerator = (1^2 / 2!) = 0.5</span><span class="math-step">Denominator = (1 + 1 + 0.5) = 2.5</span><span class="math-step">B = 0.5 / 2.5 = 0.2 = 20%</span><p><strong>Final Answer: 20% blocking probability</strong></p></div></div>
+  <div class="qa-item"><div class="qa-question">5. Voice Circuit Efficiency</div><div class="qa-answer"><p><strong>Problem:</strong> 64 kbps circuit, 5 min total, 1.5 min active talk time.</p><span class="math-step">η = (90 / 300) × 100 = 30%</span><p><strong>Final Answer: 30% efficiency (70% wasted)</strong></p></div></div>
+  <div class="qa-item"><div class="qa-question">6. TDM Frame Rate and Duration</div><div class="qa-answer"><p><strong>Problem:</strong> 4 channels at 100 kbps each, 1 byte per channel per frame.</p><span class="math-step">Frame Rate = 100,000 / 8 = 12,500 frames/sec</span><span class="math-step">Frame Duration = 1 / 12,500 = 80 μs</span><p><strong>Final Answer: 12,500 frames/s; 80 μs per frame</strong></p></div></div>
+  <div class="qa-item"><div class="qa-question">7. Fully-Connected Mesh Link Requirements (N=15)</div><div class="qa-answer"><p><strong>Problem:</strong> 15 endpoint nodes in a fully-connected mesh.</p><span class="math-step">L = N×(N-1)/2 = 15×14/2 = 105</span><p><strong>Final Answer: 105 dedicated physical links</strong></p></div></div>
+  <div class="qa-item"><div class="qa-question">8. Maximum Data on ISDN Connection (2 hours)</div><div class="qa-answer"><p><strong>Problem:</strong> 128 kbps ISDN, 2 hours.</p><span class="math-step">Total bits = 128,000 × 7200 = 921,600,000 bits</span><span class="math-step">= 921,600,000 / 8 / 10^6 = 115.2 MB</span><p><strong>Final Answer: 115.2 MB</strong></p></div></div>
+  <div class="qa-item"><div class="qa-question">9. T1 Carrier Framing Overhead</div><div class="qa-answer"><p><strong>Problem:</strong> T1: 24 channels × 8 bits + 1 framing bit = 193 bits/frame.</p><span class="math-step">Overhead % = (1 / 193) × 100 ≈ 0.518%</span><p><strong>Final Answer: ≈0.518% overhead</strong></p></div></div>
+  <div class="qa-item"><div class="qa-question">10. Setup Delay vs Message Size Ratio</div><div class="qa-answer"><p><strong>Problem:</strong> BW = 1 Mbps, setup = 0.5s, message = 1000 bits.</p><span class="math-step">T_tx = 1000 / 1,000,000 = 0.001 s</span><span class="math-step">% in setup = (0.5 / 0.501) × 100 ≈ 99.8%</span><p><strong>Final Answer: 99.8% of time spent on setup — proves CS is inefficient for short bursts.</strong></p></div></div>
+</section>
+
+<footer>◈ CIRCUIT SWITCHING — COMPUTER NETWORKS PROJECT &nbsp;|&nbsp; BUILT WITH HTML · CSS · JS</footer>
+
+<!-- SOLUTION MODAL -->
+<div class="solution-overlay" id="sol-overlay">
+  <div class="solution-modal">
+    <div class="modal-header">
+      <div class="modal-title" id="sol-title">—</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="sol-body"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// VARIABLE DEFINITIONS
+// ══════════════════════════════════════
+const VARS = [
+  { id:'lambda',   sym:'λ',   name:'Call Arrival Rate',        unit:'calls/hr',  ph:'e.g. 120' },
+  { id:'h',        sym:'h',   name:'Average Holding Time',     unit:'hours',     ph:'e.g. 0.05' },
+  { id:'A',        sym:'A',   name:'Traffic Intensity',        unit:'Erlangs',   ph:'e.g. 6.0' },
+  { id:'N',        sym:'N',   name:'Number of Circuits',       unit:'count',     ph:'e.g. 8' },
+  { id:'B_prob',   sym:'B',   name:'Blocking Probability',     unit:'(0–1)',      ph:'e.g. 0.2' },
+  { id:'L',        sym:'L',   name:'Message Size',             unit:'bits',      ph:'e.g. 10000' },
+  { id:'BW',       sym:'BW',  name:'Link Bandwidth',           unit:'bps',       ph:'e.g. 100000' },
+  { id:'d',        sym:'d',   name:'Distance',                 unit:'km',        ph:'e.g. 2000' },
+  { id:'v',        sym:'v',   name:'Propagation Speed',        unit:'km/s',      ph:'e.g. 200000',  def:'200000' },
+  { id:'T_setup',  sym:'Ts',  name:'Circuit Setup Time',       unit:'ms',        ph:'e.g. 200',     def:'0' },
+  { id:'T_tx',     sym:'Ttx', name:'Transmission Delay',       unit:'ms',        ph:'auto-calc' },
+  { id:'T_prop',   sym:'Tp',  name:'Propagation Delay',        unit:'ms',        ph:'auto-calc' },
+  { id:'T_total',  sym:'Tt',  name:'Total End-to-End Delay',   unit:'ms',        ph:'auto-calc' },
+  { id:'T_active', sym:'Ta',  name:'Active Transfer Time',     unit:'s',         ph:'e.g. 90' },
+  { id:'T_call',   sym:'Tc',  name:'Total Call Duration',      unit:'s',         ph:'e.g. 300' },
+  { id:'eta',      sym:'η',   name:'Link Efficiency',          unit:'%',         ph:'auto-calc' },
+  { id:'R_ch',     sym:'Rc',  name:'TDM Channel Rate',         unit:'bps',       ph:'auto-calc' },
+  { id:'mesh_n',   sym:'Mn',  name:'Mesh Node Count',          unit:'nodes',     ph:'e.g. 15' },
+  { id:'mesh_L',   sym:'ML',  name:'Mesh Links Required',      unit:'links',     ph:'auto-calc' },
+  { id:'max_data', sym:'Md',  name:'Max Data Transferred',     unit:'MB',        ph:'auto-calc' },
+];
+
+let vals = {};
+
+function getVal(id) { return vals[id] !== undefined && vals[id] !== '' ? parseFloat(vals[id]) : null; }
+function hasVal(id) { const v = getVal(id); return v !== null && !isNaN(v); }
+
+// ══════════════════════════════════════
+// RENDER VARIABLE LIST
+// ══════════════════════════════════════
+function renderVarList() {
+  const container = document.getElementById('var-list');
+  
+  // Initialization: create DOM elements only if they don't exist
+  if (container.children.length === 0) {
+    VARS.forEach(v => {
+      const row = document.createElement('div');
+      row.id = 'row_' + v.id;
+      row.innerHTML = `
+        <div class="var-badge">${v.sym}</div>
+        <div class="var-name">${v.name}</div>
+        <input class="var-input" type="number" id="inp_${v.id}"
+          placeholder="${v.ph}"
+          step="any" oninput="onInput('${v.id}', this.value)">
+        <div class="var-unit">${v.unit}</div>
+      `;
+      container.appendChild(row);
+    });
+  }
+
+  // Update states without destroying and stealing focus
+  VARS.forEach(v => {
+    const row = document.getElementById('row_' + v.id);
+    const input = document.getElementById('inp_' + v.id);
+    const isDeduced = vals['__deduced_' + v.id];
+
+    // Update row highlighting
+    row.className = 'var-row' + (hasVal(v.id) ? ' has-value' : '') + (isDeduced ? ' deduced' : '');
+
+    // Only update the value via JS if the user is NOT actively typing in it
+    if (document.activeElement !== input) {
+      input.value = vals[v.id] !== undefined ? vals[v.id] : (v.def || '');
+    }
+
+    input.disabled = !!isDeduced;
+  });
+}
+
+function onInput(id, value) {
+  vals[id] = value === '' ? undefined : value;
+  delete vals['__deduced_' + id];
+  updateDeducibles();
+  renderVarList();
+}
+
+function clearAll() {
+  vals = {};
+  updateDeducibles();
+  renderVarList();
+}
+
+// ══════════════════════════════════════
+// DEDUCTION ENGINE
+// ══════════════════════════════════════
+// Each rule: { id, label, can: fn, solve: fn } 
+const RULES = [
+  {
+    id: 'A_from_lambda_h',
+    label: 'Traffic Intensity (A)',
+    varId: 'A',
+    color: '#00d4ff',
+    icon: '📡',
+    can: () => hasVal('lambda') && hasVal('h') && !hasVal('A'),
+    solve: () => {
+      const lambda = getVal('lambda'), h = getVal('h');
+      const A = lambda * h;
+      return {
+        value: A, display: A.toFixed(4), unit: 'Erlangs',
+        formula: 'A = λ × h',
+        steps: [
+          { title:'GIVEN VALUES', content:`λ = ${lambda} calls/hr,  h = ${h} hours`, math: null },
+          { title:'APPLY FORMULA', content:'Traffic intensity = arrival rate × holding time', math:`A = ${lambda} × ${h} = ${A.toFixed(4)}` },
+          { title:'INTERPRET', content:`On average, <b>${A.toFixed(2)} circuits</b> are simultaneously in use. You need at least ⌈${A.toFixed(2)}⌉ = <b>${Math.ceil(A)}</b> circuits minimum.`, math: null },
+        ]
+      };
+    }
+  },
+  {
+    id: 'lambda_from_A_h',
+    label: 'Arrival Rate (λ)',
+    varId: 'lambda',
+    color: '#00d4ff',
+    icon: '📶',
+    can: () => hasVal('A') && hasVal('h') && !hasVal('lambda'),
+    solve: () => {
+      const A = getVal('A'), h = getVal('h');
+      const lambda = A / h;
+      return {
+        value: lambda, display: lambda.toFixed(4), unit: 'calls/hr',
+        formula: 'λ = A / h',
+        steps: [
+          { title:'GIVEN VALUES', content:`A = ${A} Erlangs,  h = ${h} hours`, math: null },
+          { title:'REARRANGE FORMULA', content:'From A = λ × h → λ = A / h', math:`λ = ${A} / ${h} = ${lambda.toFixed(4)} calls/hour` },
+          { title:'INTERPRET', content:`The system receives approximately <b>${lambda.toFixed(2)} calls per hour</b>.`, math: null },
+        ]
+      };
+    }
+  },
+  {
+    id: 'h_from_A_lambda',
+    label: 'Holding Time (h)',
+    varId: 'h',
+    color: '#00d4ff',
+    icon: '⏳',
+    can: () => hasVal('A') && hasVal('lambda') && !hasVal('h'),
+    solve: () => {
+      const A = getVal('A'), lambda = getVal('lambda');
+      const h = A / lambda;
+      return {
+        value: h, display: h.toFixed(6), unit: 'hours',
+        formula: 'h = A / λ',
+        steps: [
+          { title:'GIVEN VALUES', content:`A = ${A} Erlangs,  λ = ${lambda} calls/hr`, math: null },
+          { title:'REARRANGE FORMULA', content:'From A = λ × h → h = A / λ', math:`h = ${A} / ${lambda} = ${h.toFixed(6)} hours = ${(h*60).toFixed(2)} minutes` },
+          { title:'INTERPRET', content:`Average call duration is <b>${(h*60).toFixed(2)} minutes</b>.`, math: null },
+        ]
+      };
+    }
+  },
+  {
+    id: 'erlangB',
+    label: 'Blocking Probability (B)',
+    varId: 'B_prob',
+    color: '#ff6b35',
+    icon: '🚫',
+    can: () => hasVal('A') && hasVal('N') && !hasVal('B_prob'),
+    solve: () => {
+      const A = getVal('A'), N = Math.round(getVal('N'));
+      let B = 1;
+      const iters = [];
+      for (let i = 1; i <= N; i++) {
+        const prev = B;
+        B = (A * B) / (i + A * B);
+        iters.push(`i=${i}: B = (${A}×${prev.toFixed(4)}) / (${i} + ${A}×${prev.toFixed(4)}) = ${B.toFixed(6)}`);
+      }
+      const Bpct = (B * 100).toFixed(4);
+      const showIters = iters.slice(0, Math.min(4, iters.length));
+      if (iters.length > 4) showIters.push(`... (${iters.length - 4} more iterations)`);
+      return {
+        value: B, display: Bpct + '%', unit: 'blocking probability',
+        formula: 'B(N,A) = (A^N/N!) / Σ(k=0 to N)[A^k/k!]  — computed via iterative recursion',
+        steps: [
+          { title:'GIVEN VALUES', content:`Traffic intensity A = ${A} Erlangs,  Circuits N = ${N}`, math: null },
+          { title:'ERLANG B RECURSIVE METHOD', content:'Start with B₀ = 1, then iterate: Bᵢ = (A × Bᵢ₋₁) / (i + A × Bᵢ₋₁)', math: showIters.join('\n') },
+          { title:'FINAL BLOCKING PROBABILITY', content:`After ${N} iterations:`, math:`B(${N}, ${A}) = ${B.toFixed(6)} = ${Bpct}%` },
+          { title:'INTERPRET', content:`${Bpct}% of incoming calls will be <b>rejected</b> (blocked) due to all circuits being busy.<br>${B > 0.05 ? '⚠ Blocking > 5% — add more circuits.' : '✓ Blocking < 5% — acceptable service level.'}`, math: null },
+        ]
+      };
+    }
+  },
+  {
+    id: 'T_tx_calc',
+    label: 'Transmission Delay (T_tx)',
+    varId: 'T_tx',
+    color: '#00ff9d',
+    icon: '📤',
+    can: () => hasVal('L') && hasVal('BW') && !hasVal('T_tx'),
+    solve: () => {
+      const L = getVal('L'), BW = getVal('BW');
+      const T_tx_s = L / BW;
+      const T_tx_ms = T_tx_s * 1000;
+      return {
+        value: T_tx_ms, display: T_tx_ms.toFixed(4), unit: 'ms',
+        formula: 'T_tx = L / BW',
+        steps: [
+          { title:'GIVEN VALUES', content:`Message size L = ${L.toLocaleString()} bits,  Bandwidth BW = ${BW.toLocaleString()} bps`, math: null },
+          { title:'APPLY FORMULA', content:'Transmission delay = time to push all bits onto the wire', math:`T_tx = ${L.toLocaleString()} / ${BW.toLocaleString()} = ${T_tx_s.toFixed(6)} s = ${T_tx_ms.toFixed(4)} ms` },
+          { title:'INTERPRET', content:`It takes <b>${T_tx_ms.toFixed(4)} ms</b> to transmit the entire ${L.toLocaleString()}-bit message at ${(BW/1000).toFixed(0)} kbps.`, math: null },
+        ]
+      };
+    }
+  },
+  {
+    id: 'T_prop_calc',
+    label: 'Propagation Delay (T_prop)',
+    varId: 'T_prop',
+    color: '#00ff9d',
+    icon: '🌐',
+    can: () => hasVal('d') && hasVal('v') && !hasVal('T_prop'),
+    solve: () => {
+      const d = getVal('d'), v = getVal('v');
+      const T_prop_s = d / v;
+      const T_prop_ms = T_prop_s * 1000;
+      return {
+        value: T_prop_ms, display: T_prop_ms.toFixed(4), unit: 'ms',
+        formula: 'T_prop = d / v',
+        steps: [
+          { title:'GIVEN VALUES', content:`Distance d = ${d.toLocaleString()} km,  Propagation speed v = ${v.toLocaleString()} km/s`, math: null },
+          { title:'APPLY FORMULA', content:'Propagation delay = time for signal to travel from sender to receiver', math:`T_prop = ${d.toLocaleString()} / ${v.toLocaleString()} = ${T_prop_s.toFixed(6)} s = ${T_prop_ms.toFixed(4)} ms` },
+          { title:'INTERPRET', content:`The signal takes <b>${T_prop_ms.toFixed(4)} ms</b> to travel ${d.toLocaleString()} km at ${((v/300000)*100).toFixed(0)}% the speed of light.`, math: null },
+        ]
+      };
+    }
+  },
+  {
+    id: 'T_total_calc',
+    label: 'Total End-to-End Delay',
+    varId: 'T_total',
+    color: '#ffe066',
+    icon: '⏱️',
+    can: () => !hasVal('T_total') && (
+      (hasVal('T_setup') || true) && 
+      (hasVal('T_tx') || (hasVal('L') && hasVal('BW'))) &&
+      (hasVal('T_prop') || (hasVal('d') && hasVal('v')))
+    ) && (
+      (hasVal('T_tx') || (hasVal('L') && hasVal('BW'))) &&
+      (hasVal('T_prop') || (hasVal('d') && hasVal('v')))
+    ),
+    solve: () => {
+      const T_setup = hasVal('T_setup') ? getVal('T_setup') : 0;
+      const T_tx = hasVal('T_tx') ? getVal('T_tx') : (getVal('L') / getVal('BW')) * 1000;
+      const T_prop = hasVal('T_prop') ? getVal('T_prop') : (getVal('d') / getVal('v')) * 1000;
+      const T_total = T_setup + T_tx + T_prop;
+      const pct = (v) => ((v / T_total) * 100).toFixed(1);
+      return {
+        value: T_total, display: T_total.toFixed(4), unit: 'ms',
+        formula: 'T_total = T_setup + T_tx + T_prop',
+        steps: [
+          { title:'COMPONENT VALUES', content:`Setup time = ${T_setup} ms<br>Transmission delay = ${T_tx.toFixed(4)} ms<br>Propagation delay = ${T_prop.toFixed(4)} ms`, math: null },
+          { title:'SUM ALL COMPONENTS', content:'Total end-to-end delay = sum of all delay components', math:`T_total = ${T_setup} + ${T_tx.toFixed(4)} + ${T_prop.toFixed(4)} = ${T_total.toFixed(4)} ms` },
+          { title:'BREAKDOWN BY PERCENTAGE', content:`Setup: ${pct(T_setup)}%  |  Transmission: ${pct(T_tx)}%  |  Propagation: ${pct(T_prop)}%`, math: null },
+          { title:'CIRCUIT SWITCHING KEY INSIGHT', content:`In circuit switching, data can only flow <b>after</b> the setup phase completes (${T_setup} ms). Setup time = ${pct(T_setup)}% of total delay.`, math: null },
+        ]
+      };
+    }
+  },
+  {
+    id: 'efficiency_calc',
+    label: 'Link Efficiency (η)',
+    varId: 'eta',
+    color: '#ffe066',
+    icon: '📊',
+    can: () => hasVal('T_active') && hasVal('T_call') && !hasVal('eta'),
+    solve: () => {
+      const Ta = getVal('T_active'), Tc = getVal('T_call');
+      const eta = (Ta / Tc) * 100;
+      const wasted = ((1 - Ta/Tc)*100).toFixed(2);
+      const BW = hasVal('BW') ? getVal('BW') : null;
+      const dataActual = BW ? (Ta * BW / 8 / 1e6).toFixed(3) : null;
+      return {
+        value: eta, display: eta.toFixed(2) + '%', unit: 'link efficiency',
+        formula: 'η = (T_active / T_call) × 100',
+        steps: [
+          { title:'GIVEN VALUES', content:`Active time = ${Ta} s,  Total call duration = ${Tc} s`, math: null },
+          { title:'CALCULATE SILENCE PERIOD', content:'Time bandwidth is reserved but NOT used:', math:`Silence = ${Tc} − ${Ta} = ${(Tc-Ta).toFixed(2)} s` },
+          { title:'APPLY EFFICIENCY FORMULA', content:'Fraction of reserved time actually carrying data:', math:`η = (${Ta} / ${Tc}) × 100 = ${eta.toFixed(2)}%` },
+          { title:'INTERPRET', content:`<b>${wasted}%</b> of reserved bandwidth is wasted during silence. ${eta < 50 ? '⚠ Less than 50% — major argument for packet switching over bursty data.' : '✓ Relatively efficient for a dedicated circuit.'}${dataActual ? `<br><br>Useful data transferred at ${(BW/1000).toFixed(0)} kbps: <b>${dataActual} MB</b>` : ''}`, math: null },
+        ]
+      };
+    }
+  },
+  {
+    id: 'TDM_ch_rate',
+    label: 'TDM Channel Rate (R_ch)',
+    varId: 'R_ch',
+    color: '#a78bfa',
+    icon: '🔀',
+    can: () => hasVal('BW') && hasVal('N') && !hasVal('R_ch'),
+    solve: () => {
+      const BW = getVal('BW'), N = getVal('N');
+      const Rch = BW / N;
+      const T_slot = (1 / Rch) * 1e6;
+      const T_frame = N * T_slot;
+      return {
+        value: Rch, display: Rch.toLocaleString(), unit: 'bps per channel',
+        formula: 'R_ch = BW / N',
+        steps: [
+          { title:'GIVEN VALUES', content:`Total link bandwidth BW = ${BW.toLocaleString()} bps,  TDM channels N = ${N}`, math: null },
+          { title:'COMPUTE PER-CHANNEL RATE', content:'Each channel gets an equal share of the total bandwidth (TDM divides time equally):', math:`R_ch = ${BW.toLocaleString()} / ${N} = ${Rch.toLocaleString()} bps` },
+          { title:'COMPUTE SLOT DURATION', content:'Time each channel occupies per TDM frame:', math:`T_slot = 1 / ${Rch.toLocaleString()} = ${T_slot.toFixed(4)} μs` },
+          { title:'COMPUTE FRAME DURATION', content:`One complete TDM frame = ${N} slots × T_slot:`, math:`T_frame = ${N} × ${T_slot.toFixed(4)} μs = ${T_frame.toFixed(4)} μs` },
+          { title:'REAL-WORLD CONTEXT', content:`T1 line: BW=1.544 Mbps, N=24 → R_ch=64 kbps (DS0). Frame=125 μs → 8000 frames/sec.`, math: null },
+        ]
+      };
+    }
+  },
+  {
+    id: 'mesh_links',
+    label: 'Mesh Links Required',
+    varId: 'mesh_L',
+    color: '#f472b6',
+    icon: '🕸️',
+    can: () => hasVal('mesh_n') && !hasVal('mesh_L'),
+    solve: () => {
+      const n = Math.round(getVal('mesh_n'));
+      const L = n * (n - 1) / 2;
+      return {
+        value: L, display: L.toString(), unit: 'links',
+        formula: 'L = N × (N − 1) / 2',
+        steps: [
+          { title:'GIVEN VALUES', content:`Number of nodes N = ${n}`, math: null },
+          { title:'FORMULA FOR FULLY-CONNECTED MESH', content:'Every node must connect to every other node exactly once:', math:`L = ${n} × (${n}−1) / 2 = ${n} × ${n-1} / 2 = ${L}` },
+          { title:'INTERPRET', content:`${L} dedicated physical links are needed. At N=15, this is already ${L} links — showing why circuit-switched meshes <b>don't scale</b> without hierarchical switching.`, math: null },
+          { title:'COMPARISON', content:`N=5 → 10 links | N=10 → 45 links | N=15 → 105 links | N=20 → 190 links<br>Cost grows as O(N²) — impractical for large networks.`, math: null },
+        ]
+      };
+    }
+  },
+  {
+    id: 'max_data_calc',
+    label: 'Max Data Transferred',
+    varId: 'max_data',
+    color: '#a78bfa',
+    icon: '💾',
+    can: () => hasVal('BW') && hasVal('T_active') && !hasVal('max_data'),
+    solve: () => {
+      const BW = getVal('BW'), Ta = getVal('T_active');
+      const bits = BW * Ta;
+      const MB = bits / 8 / 1e6;
+      return {
+        value: MB, display: MB.toFixed(4), unit: 'MB',
+        formula: 'Data = BW × T_active  →  convert bits to MB',
+        steps: [
+          { title:'GIVEN VALUES', content:`Bandwidth BW = ${BW.toLocaleString()} bps,  Active transfer time = ${Ta} s`, math: null },
+          { title:'CALCULATE TOTAL BITS', content:'Maximum bits that can be transmitted during active period:', math:`Bits = ${BW.toLocaleString()} × ${Ta} = ${bits.toLocaleString()} bits` },
+          { title:'CONVERT TO MEGABYTES', content:'Divide by 8 (bits→bytes) then by 10⁶ (bytes→MB):', math:`MB = ${bits.toLocaleString()} / 8 / 1,000,000 = ${MB.toFixed(4)} MB` },
+          { title:'INTERPRET', content:`At ${(BW/1000).toFixed(0)} kbps for ${Ta}s, up to <b>${MB.toFixed(4)} MB</b> can be transferred. In circuit switching, this capacity is <b>reserved</b> regardless of actual usage.`, math: null },
+        ]
+      };
+    }
+  },
+];
+
+function updateDeducibles() {
+  const applicable = RULES.filter(r => r.can());
+  const countEl = document.getElementById('deducible-count');
+  const grid = document.getElementById('deducible-grid');
+  
+  if (applicable.length === 0) {
+    countEl.innerHTML = `Enter values above to see what can be calculated.`;
+    grid.innerHTML = '<span class="no-deducible">No deducible values yet. Enter some known quantities above.</span>';
+    return;
+  }
+  
+  countEl.innerHTML = `<span>${applicable.length}</span> quantit${applicable.length===1?'y':'ies'} can be calculated from your inputs.`;
+  grid.innerHTML = '';
+  applicable.forEach(r => {
+    const chip = document.createElement('div');
+    chip.className = 'deducible-chip';
+    chip.innerHTML = `<span class="chip-icon">${r.icon}</span><span class="chip-label">${r.label}</span><span class="chip-arrow">▶ SOLVE</span>`;
+    chip.style.borderColor = r.color + '80';
+    chip.style.color = r.color;
+    chip.addEventListener('click', () => openSolution(r));
+    grid.appendChild(chip);
+  });
+}
+
+// ══════════════════════════════════════
+// SOLUTION MODAL
+// ══════════════════════════════════════
+function openSolution(rule) {
+  const result = rule.solve();
+  document.getElementById('sol-title').textContent = '◈ ' + rule.label.toUpperCase();
+  
+  const body = document.getElementById('sol-body');
+  body.innerHTML = `<div class="modal-formula">${result.formula}</div>`;
+  
+  result.steps.forEach((step, i) => {
+    const div = document.createElement('div');
+    div.className = 'modal-step';
+    div.innerHTML = `
+      <div class="modal-step-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="modal-step-body">
+        <div class="modal-step-title">${step.title}</div>
+        <div class="modal-step-content">${step.content}</div>
+        ${step.math ? `<span class="modal-step-math">${step.math.replace(/\n/g,'<br>')}</span>` : ''}
+      </div>`;
+    body.appendChild(div);
+    setTimeout(() => div.classList.add('visible'), i * 220 + 100);
+  });
+  
+  const resDiv = document.createElement('div');
+  resDiv.className = 'modal-result';
+  resDiv.innerHTML = `
+    <div>
+      <div class="res-label">COMPUTED VALUE</div>
+      <div class="res-val">${result.display}</div>
+      <div class="res-unit">${result.unit}</div>
+    </div>`;
+  body.appendChild(resDiv);
+  setTimeout(() => resDiv.classList.add('visible'), result.steps.length * 220 + 200);
+  
+  // Set deduced value
+  vals[rule.varId] = result.value;
+  vals['__deduced_' + rule.varId] = true;
+  renderVarList();
+  updateDeducibles();
+  
+  document.getElementById('sol-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('sol-overlay').classList.remove('open');
+}
+document.getElementById('sol-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// Init
+renderVarList();
+updateDeducibles();
+
+// ══════════════════════════════════════
+// COMPLEX VISUALIZATION
+// ══════════════════════════════════════
+const canvas = document.getElementById('netCanvas');
+const ctx = canvas.getContext('2d');
+
+// Complex network topology: 12 nodes
+const NODES = [
+  { id:0,  rx:0.05, ry:0.5,  label:'A',    type:'host',    color:'#00d4ff', status:'working' },
+  { id:1,  rx:0.18, ry:0.25, label:'SW-1', type:'switch',  color:'#ffe066', status:'working' },
+  { id:2,  rx:0.18, ry:0.75, label:'SW-2', type:'switch',  color:'#ffe066', status:'working' },
+  { id:3,  rx:0.35, ry:0.15, label:'SW-3', type:'switch',  color:'#ffe066', status:'working' },
+  { id:4,  rx:0.35, ry:0.5,  label:'SW-4', type:'switch',  color:'#ffe066', status:'working' },
+  { id:5,  rx:0.35, ry:0.85, label:'SW-5', type:'switch',  color:'#ffe066', status:'working' },
+  { id:6,  rx:0.55, ry:0.25, label:'SW-6', type:'switch',  color:'#ffe066', status:'working' },
+  { id:7,  rx:0.55, ry:0.65, label:'SW-7', type:'switch',  color:'#ffe066', status:'working' },
+  { id:8,  rx:0.72, ry:0.15, label:'SW-8', type:'switch',  color:'#ffe066', status:'working' },
+  { id:9,  rx:0.72, ry:0.5,  label:'SW-9', type:'switch',  color:'#ffe066', status:'working' },
+  { id:10, rx:0.72, ry:0.85, label:'SW-10',type:'switch',  color:'#ffe066', status:'working' },
+  { id:11, rx:0.95, ry:0.5,  label:'B',    type:'host',    color:'#00ff9d', status:'working' },
+];
+
+const ALL_EDGES = [
+  [0,1],[0,2],[1,2],[1,3],[1,4],[2,4],[2,5],[3,4],[3,6],[4,6],[4,7],[5,7],[5,10],
+  [6,7],[6,8],[6,9],[7,9],[7,10],[8,9],[9,10],[8,11],[9,11],[10,11]
+];
+
+// Main circuit path (Dynamic)
+let CIRCUIT = [];
+let CIRCUIT_EDGES = [];
+
+let vizPhase = 'idle';
+let vizProgress = 0;
+let vizAF;
+let setupDone = false, dataDone = false;
+let packetCount = 0;
+let dataLoopCount = 0;
+let lastSetupTime = null;
+let multiPackets = []; // for data phase: multiple packets
+let glowTime = 0;
+
+// --- Pathfinding & Interaction Logic ---
+function findPath(startId, endId) {
+  let queue = [[startId]];
+  let visited = new Set([startId]);
+  let adj = {};
+  NODES.forEach(n => adj[n.id] = []);
+  ALL_EDGES.forEach(e => {
+    adj[e[0]].push(e[1]);
+    adj[e[1]].push(e[0]);
+  });
+
+  while(queue.length > 0) {
+    let path = queue.shift();
+    let curr = path[path.length - 1];
+    
+    if (curr === endId) return path;
+
+    for (let neighbor of adj[curr]) {
+      if (!visited.has(neighbor) && NODES[neighbor].status !== 'broken') {
+        visited.add(neighbor);
+        queue.push([...path, neighbor]);
+      }
+    }
+  }
+  return null;
+}
+
+canvas.addEventListener('mousemove', function(e) {
+  if (vizPhase !== 'idle' && vizPhase !== 'done') {
+    canvas.style.cursor = 'default';
+    return;
+  }
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const cx = (e.clientX - rect.left) * scaleX;
+  const cy = (e.clientY - rect.top) * scaleY;
+
+  let hover = false;
+  NODES.forEach(n => {
+    if (n.type === 'switch') {
+      const p = { x: n.rx * canvas.width, y: n.ry * canvas.height };
+      if (Math.sqrt((cx - p.x)**2 + (cy - p.y)**2) < 15) hover = true;
+    }
+  });
+  canvas.style.cursor = hover ? 'pointer' : 'default';
+});
+
+canvas.addEventListener('mousedown', function(e) {
+  if (vizPhase !== 'idle' && vizPhase !== 'done') {
+    addLog('info', '! Cannot alter switches while a circuit is active.');
+    return;
+  }
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const cx = (e.clientX - rect.left) * scaleX;
+  const cy = (e.clientY - rect.top) * scaleY;
+
+  NODES.forEach(n => {
+    if (n.type === 'switch') {
+      const p = { x: n.rx * canvas.width, y: n.ry * canvas.height };
+      if (Math.sqrt((cx - p.x)**2 + (cy - p.y)**2) < 15) {
+        n.status = n.status === 'broken' ? 'working' : 'broken';
+        addLog('info', `Toggle: ${n.label} is now ${n.status.toUpperCase()}`);
+        if (vizPhase === 'done') resetViz();
+        else drawFrame();
+      }
+    }
+  });
+});
+
+function px(node) {
+  return { x: node.rx * canvas.width, y: node.ry * canvas.height };
+}
+
+function isCircuitEdge(e) {
+  return CIRCUIT_EDGES.some(ce => (ce[0]===e[0]&&ce[1]===e[1])||(ce[0]===e[1]&&ce[1]===e[0]));
+}
+
+function drawFrame() {
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+  glowTime += 0.04;
+
+  // Draw all edges
+  ALL_EDGES.forEach(e => {
+    const nodeA = NODES[e[0]];
+    const nodeB = NODES[e[1]];
+    const a = px(nodeA);
+    const b = px(nodeB);
+    
+    // Check if the teardown phase has removed this edge
+    let isTornDownEdge = false;
+    if (vizPhase === 'teardown' && CIRCUIT.length > 0) {
+        const pathRev = [...CIRCUIT].reverse();
+        const tdSeg = vizProgress * (pathRev.length - 1);
+        for (let i = 0; i < Math.floor(tdSeg); i++) {
+            if ((e[0] === pathRev[i] && e[1] === pathRev[i+1]) || (e[1] === pathRev[i] && e[0] === pathRev[i+1])) {
+                isTornDownEdge = true;
+            }
+        }
+    }
+
+    const onCkt = isCircuitEdge(e) && !isTornDownEdge;
+    // We remove vizPhase === 'data' from active so the path doesn't glow solid green during data.
+    const active = onCkt && (vizPhase === 'setup' || vizPhase === 'teardown');
+    const isBroken = nodeA.status === 'broken' || nodeB.status === 'broken';
+
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+
+    if (isBroken) {
+      ctx.strokeStyle = 'rgba(255, 107, 53, 0.15)';
+      ctx.lineWidth = 1;
+      ctx.shadowBlur = 0;
+      ctx.setLineDash([4,4]);
+    } else if (active) {
+      const col = vizPhase === 'teardown' ? '#ff6b35' : '#00d4ff';
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 2.5;
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = col;
+      ctx.setLineDash(vizPhase === 'setup' ? [8,5] : []);
+    } else {
+      ctx.strokeStyle = onCkt && setupDone ? 'rgba(0,212,255,0.25)' : '#0d2a3d';
+      ctx.lineWidth = 1;
+      ctx.shadowBlur = 0;
+      ctx.setLineDash([]);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.shadowBlur = 0;
+
+    // Bandwidth label on active edges
+    if (onCkt && vizPhase === 'data') {
+      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      ctx.fillStyle = 'rgba(0,255,157,0.7)';
+      ctx.font = '9px Share Tech Mono';
+      ctx.textAlign = 'center';
+      ctx.fillText('64K', mx, my - 5);
+    }
+  });
+
+  // Draw moving particles on circuit edges (setup/data/teardown)
+  if (vizPhase === 'setup' || vizPhase === 'teardown') {
+    const path = vizPhase === 'teardown' ? [...CIRCUIT].reverse() : CIRCUIT;
+    const t = vizProgress * (path.length - 1);
+    const seg = Math.min(Math.floor(t), path.length - 2);
+    const frac = t - seg;
+    const a = px(NODES[path[seg]]);
+    const b = px(NODES[path[seg+1]]);
+    const ppx = a.x + (b.x - a.x) * frac;
+    const ppy = a.y + (b.y - a.y) * frac;
+    const col = vizPhase === 'teardown' ? '#ff6b35' : '#00d4ff';
+
+    // Trail
+    ctx.beginPath();
+    ctx.arc(ppx, ppy, 10, 0, Math.PI*2);
+    ctx.fillStyle = col + '20';
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(ppx, ppy, 6, 0, Math.PI*2);
+    ctx.fillStyle = col;
+    ctx.shadowBlur = 25;
+    ctx.shadowColor = col;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Label
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 8px Share Tech Mono';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(vizPhase === 'teardown' ? 'REL' : 'SIG', ppx, ppy);
+    ctx.textBaseline = 'alphabetic';
+  }
+
+  // Multiple data packets (Continuous stream)
+  if (vizPhase === 'data') {
+    multiPackets.forEach((mp) => {
+      if (mp.progress < 0) return; // Wait to enter the screen
+      const path = CIRCUIT;
+      const t = mp.progress * (path.length - 1);
+      const seg = Math.min(Math.floor(t), path.length - 2);
+      const frac = t - seg;
+      const a = px(NODES[path[seg]]);
+      const b = px(NODES[path[seg+1]]);
+      const ppx = a.x + (b.x - a.x) * frac;
+      const ppy = a.y + (b.y - a.y) * frac;
+
+      ctx.beginPath();
+      ctx.arc(ppx, ppy, 8, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(0,255,157,0.15)';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(ppx, ppy, 5, 0, Math.PI*2);
+      ctx.fillStyle = '#00ff9d';
+      ctx.shadowBlur = 18;
+      ctx.shadowColor = '#00ff9d';
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#000';
+      ctx.font = 'bold 7px Share Tech Mono';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('D', ppx, ppy);
+      ctx.textBaseline = 'alphabetic';
+    });
+  }
+
+  // Draw nodes
+  NODES.forEach((n, i) => {
+    const p = px(n);
+    
+    // Check if the teardown phase has removed this node
+    let isTornDownNode = false;
+    if (vizPhase === 'teardown' && CIRCUIT.length > 0) {
+        const pathRev = [...CIRCUIT].reverse();
+        const tdSeg = vizProgress * (pathRev.length - 1);
+        const nodeRevIdx = pathRev.indexOf(n.id);
+        if (nodeRevIdx !== -1 && nodeRevIdx <= tdSeg) {
+            isTornDownNode = true;
+        }
+    }
+
+    const onPath = CIRCUIT.includes(i) && !isTornDownNode;
+    const isHost = n.type === 'host';
+    const isBroken = n.status === 'broken';
+    const r = isHost ? 18 : 12;
+
+    const glow = onPath && vizPhase !== 'idle' && !isBroken;
+    const pulse = glow && vizPhase === 'data' ? Math.sin(glowTime + i) * 0.3 + 0.7 : 1;
+
+    // Outer glow for active nodes
+    if (glow) {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r + 6, 0, Math.PI*2);
+      ctx.fillStyle = `${n.color}15`;
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, r, 0, Math.PI*2);
+    
+    if (isBroken) {
+      ctx.fillStyle = 'rgba(255,107,53,0.15)';
+      ctx.fill();
+      ctx.strokeStyle = '#ff6b35';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      
+      ctx.fillStyle = '#ff6b35';
+      ctx.font = `14px Share Tech Mono`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('✕', p.x, p.y + 1);
+      ctx.textBaseline = 'alphabetic';
+    } else {
+      ctx.fillStyle = glow ? (vizPhase === 'data' ? 'rgba(0,212,255,0.08)' : vizPhase === 'teardown' ? 'rgba(255,107,53,0.1)' : 'rgba(0,212,255,0.1)') : '#071520';
+      ctx.fill();
+      
+      const strokeCol = glow ? (vizPhase === 'data' ? '#00d4ff' : vizPhase === 'teardown' ? '#ff6b35' : '#00d4ff') : (onPath && setupDone ? 'rgba(0,212,255,0.4)' : '#0d3a5c');
+      ctx.strokeStyle = strokeCol;
+      ctx.lineWidth = glow ? 2 : 1;
+      if (glow) { ctx.shadowBlur = 12 * pulse; ctx.shadowColor = strokeCol; }
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Inner icon for host nodes
+      if (isHost) {
+        ctx.fillStyle = glow ? strokeCol : '#ffffff';
+        ctx.font = `bold 10px Share Tech Mono`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(n.label, p.x, p.y);
+      } else {
+        ctx.fillStyle = glow ? '#fff' : '#ffffff';
+        ctx.font = `9px Share Tech Mono`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(n.label, p.x, p.y - 0);
+      }
+      ctx.textBaseline = 'alphabetic';
+    }
+  });
+
+  // Draw circuit path overlay if established
+  if (setupDone && vizPhase !== 'idle' && CIRCUIT.length > 0) {
+    // Path indicator
+    const pathLabel = `CIRCUIT: ` + CIRCUIT.map(id => NODES[id].label).join(' → ');
+    ctx.fillStyle = 'rgba(0,212,255,0.6)';
+    ctx.font = '10px Share Tech Mono';
+    ctx.textAlign = 'left';
+    ctx.fillText(pathLabel, 10, canvas.height - 10);
+  }
+}
+
+// ─── VIZ ANIMATION LOOPS ─────────────
+let statsInterval = null;
+
+function startPhase(phase) {
+  cancelAnimationFrame(vizAF);
+  multiPackets = [];
+  vizPhase = phase;
+  vizProgress = 0;
+
+  document.querySelectorAll('#btn-setup,#btn-data,#btn-teardown').forEach(b => b.classList.remove('active'));
+
+  if (phase === 'setup') {
+    const path = findPath(0, 11);
+    if (!path) {
+      addLog('teardown', '❌ SETUP FAILED: No available path from A to B!');
+      document.getElementById('viz-status-bar').textContent = '◈ SETUP FAILED — NETWORK PARTITIONED';
+      document.getElementById('s-phase').textContent = 'FAILED';
+      vizPhase = 'idle';
+      drawFrame();
+      return;
+    }
+    
+    CIRCUIT = path;
+    CIRCUIT_EDGES = [];
+    for (let i = 0; i < path.length - 1; i++) {
+      CIRCUIT_EDGES.push([path[i], path[i+1]]);
+    }
+
+    const pathStr = path.map(id => NODES[id].label).join(' → ');
+    addLog('setup', '▶ Pathfinding successful: ' + pathStr);
+    
+    document.getElementById('btn-setup').classList.add('active');
+    document.getElementById('s-phase').textContent = 'SETUP';
+    document.getElementById('s-latency').textContent = '...';
+    lastSetupTime = Date.now();
+    document.getElementById('viz-status-bar').textContent = '◈ PHASE 1 — PATHFINDING & ESTABLISHING CIRCUIT...';
+    animSetup();
+  } else if (phase === 'data') {
+    if (!setupDone) return;
+    
+    // Create a continuous stream of packets spaced evenly
+    multiPackets = [];
+    for (let i = 0; i < 6; i++) {
+        multiPackets.push({ id: i + 1, progress: -(i * 0.22) });
+    }
+    
+    document.getElementById('btn-teardown').disabled = false; // Enable teardown right away
+    addLog('data', '▶ Continuous data flowing through reserved circuit at 64 kbps');
+    document.getElementById('btn-data').classList.add('active');
+    document.getElementById('s-phase').textContent = 'DATA XFER';
+    document.getElementById('s-circuits').textContent = '1';
+    document.getElementById('s-util').textContent = '100%';
+    document.getElementById('viz-status-bar').textContent = '◈ PHASE 2 — CONTINUOUS DATA TRANSFER (CLICK TEARDOWN TO STOP)';
+    animData();
+  } else if (phase === 'teardown') {
+    addLog('teardown', '▶ Sending teardown signal, releasing resources...');
+    document.getElementById('btn-teardown').classList.add('active');
+    document.getElementById('btn-data').disabled = true;
+    document.getElementById('s-phase').textContent = 'TEARDOWN';
+    document.getElementById('viz-status-bar').textContent = '◈ PHASE 3 — RELEASING CIRCUIT RESOURCES...';
+    animTeardown();
+  }
+}
+
+function animSetup() {
+  if (vizProgress >= 1) {
+    vizProgress = 1;
+    setupDone = true;
+    dataDone = false;
+    const latency = Date.now() - lastSetupTime;
+    document.getElementById('btn-data').disabled = false;
+    document.getElementById('btn-teardown').disabled = false; // They can teardown immediately
+    document.getElementById('s-latency').textContent = latency + 'ms';
+    document.getElementById('viz-status-bar').textContent = '◈ CIRCUIT ESTABLISHED — READY FOR DATA BURST';
+    document.getElementById('active-paths').innerHTML = `<span style="color:var(--accent3)">${CIRCUIT.map(id=>NODES[id].label).join('→')}</span><br><span style="color:var(--muted)">Reserved: 64 kbps</span>`;
+    addLog('setup', '✓ Circuit established successfully');
+    drawFrame(); return;
+  }
+  vizProgress += 0.019;
+  drawFrame();
+  vizAF = requestAnimationFrame(animSetup);
+}
+
+function animData() {
+  multiPackets = multiPackets.map(mp => {
+    let nextProg = mp.progress + 0.012;
+    if (nextProg >= 1) {
+      packetCount++;
+      dataDone = true;
+      document.getElementById('s-pkts').textContent = packetCount;
+      if (packetCount % 5 === 0) addLog('data', `✓ Streaming active: ${packetCount} packets delivered...`);
+      nextProg = -0.3; // Loop back for continuous stream
+    }
+    return { ...mp, progress: nextProg };
+  });
+
+  drawFrame();
+  vizAF = requestAnimationFrame(animData);
+}
+
+function animTeardown() {
+  if (vizProgress >= 1) {
+    vizProgress = 1;
+    vizPhase = 'done';
+    setupDone = false; dataDone = false;
+    document.getElementById('s-circuits').textContent = '0';
+    document.getElementById('s-util').textContent = '0%';
+    document.getElementById('active-paths').textContent = 'No active circuits.';
+    document.getElementById('viz-status-bar').textContent = '◈ CIRCUIT RELEASED — ALL RESOURCES FREED';
+    addLog('teardown', '✓ Circuit teardown complete. Resources freed.');
+    drawFrame(); return;
+  }
+  vizProgress += 0.007;
+  drawFrame();
+  vizAF = requestAnimationFrame(animTeardown);
+}
+
+function resetViz() {
+  cancelAnimationFrame(vizAF);
+  vizPhase = 'idle'; vizProgress = 0;
+  setupDone = false; dataDone = false;
+  packetCount = 0; dataLoopCount = 0;
+  multiPackets = [];
+  CIRCUIT = [];
+  CIRCUIT_EDGES = [];
+  document.getElementById('btn-data').disabled = true;
+  document.getElementById('btn-teardown').disabled = true;
+  document.querySelectorAll('#btn-setup,#btn-data,#btn-teardown').forEach(b => b.classList.remove('active'));
+  document.getElementById('viz-status-bar').textContent = '◈ IDLE — SELECT A PHASE';
+  document.getElementById('s-phase').textContent = 'IDLE';
+  document.getElementById('s-circuits').textContent = '0';
+  document.getElementById('s-pkts').textContent = '0';
+  document.getElementById('s-util').textContent = '0%';
+  document.getElementById('s-latency').textContent = '—';
+  document.getElementById('active-paths').textContent = 'No active circuits.';
+  document.getElementById('circuit-log').innerHTML = '<span class="log-entry info">[ system reset ]</span>';
+  drawFrame();
+}
+
+function addLog(type, msg) {
+  const log = document.getElementById('circuit-log');
+  const now = new Date();
+  const ts = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+  const span = document.createElement('span');
+  span.className = `log-entry ${type}`;
+  span.textContent = `[${ts}] ${msg}`;
+  log.appendChild(span);
+  log.scrollTop = log.scrollHeight;
+}
+
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = Math.max(rect.width - (window.innerWidth > 820 ? 0 : 0), 300);
+  canvas.height = 480;
+  drawFrame();
+}
+
+window.addEventListener('resize', resizeCanvas);
+window.addEventListener('load', () => { resizeCanvas(); drawFrame(); });
+
+// QA accordion
+document.querySelectorAll('.qa-question').forEach(q => {
+  q.addEventListener('click', () => q.parentElement.classList.toggle('active'));
+});
+</script>
+
+</body></html>
